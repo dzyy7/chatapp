@@ -1,32 +1,38 @@
-import 'package:flutter/material.dart';
-import 'package:chatapp/core/constants/app_colors.dart';
-import 'package:chatapp/data/models/home_model.dart';
+// lib/presentation/home/home_page.dart
 
-// --- BAGIAN 2: HALAMAN UTAMA ---
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../core/constants/app_colors.dart';
+import '../../data/models/group_model.dart';
+import 'bloc/home_bloc.dart';
+import 'bloc/home_event.dart';
+import 'bloc/home_state.dart';
+
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<ChatGroup> groups = [
-    ChatGroup(name: "Flutter Developer", description: "Bahas UI/UX & State Management", pin: 123456),
-    ChatGroup(name: "Circle Nongkrong", description: "Rencana mabar nanti malam", pin: 112233),
-  ];
+  // Sekarang kita gunakan GroupModel dari integrasi API
+  final List<GroupModel> groups = [];
 
-  // Fungsi untuk menampilkan Bottom Sheet kekinian
   void _showAddGroupBottomSheet() {
     final nameController = TextEditingController();
     final descController = TextEditingController();
     final pinController = TextEditingController();
+    
+    // Simpan context bloc agar bisa diakses di dalam bottom sheet
+    final homeBloc = context.read<HomeBloc>();
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent, // Transparan untuk efek rounded
-      builder: (context) => Container(
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) => Container(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
+          bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom,
           left: 24, right: 24, top: 16
         ),
         decoration: BoxDecoration(
@@ -38,58 +44,86 @@ class _HomePageState extends State<HomePage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handle bar (Garis kecil di atas modal)
             Center(
               child: Container(
                 width: 50, height: 5,
-                decoration: BoxDecoration(
-                  color: AppColors.divider,
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                decoration: BoxDecoration(color: AppColors.divider, borderRadius: BorderRadius.circular(10)),
               ),
             ),
             SizedBox(height: 24),
             Text("Buat Grup Baru \u2728", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.primaryDark)),
-            SizedBox(height: 8),
-            Text("Kumpulkan teman-temanmu dalam satu ruang obrolan.", style: TextStyle(color: AppColors.textSecondary)),
             SizedBox(height: 24),
             
-            // TextFields dengan desain modern
             _buildModernTextField(controller: nameController, label: "Nama Grup", icon: Icons.group_work, color: AppColors.primary),
             SizedBox(height: 16),
             _buildModernTextField(controller: descController, label: "Deskripsi", icon: Icons.description, color: AppColors.secondary),
             SizedBox(height: 16),
-            _buildModernTextField(controller: pinController, label: "PIN Keamanan", icon: Icons.lock, color: AppColors.warning, isNumber: true),
+            _buildModernTextField(controller: pinController, label: "PIN (6 Digit)", icon: Icons.lock, color: AppColors.warning, isNumber: true),
             SizedBox(height: 32),
             
-            // Tombol Simpan Full-Width Gradient
-            Container(
-              width: double.infinity,
-              height: 55,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(colors: [AppColors.secondaryDark, AppColors.secondary]),
-                boxShadow: [BoxShadow(color: AppColors.secondary.withOpacity(0.4), blurRadius: 8, offset: Offset(0, 4))],
-              ),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-                onPressed: () {
-                  if (nameController.text.isNotEmpty) {
+            // --- BLOC CONSUMER UNTUK BUTTON ---
+            BlocProvider.value(
+              value: homeBloc, // Gunakan Bloc dari HomePage
+              child: BlocConsumer<HomeBloc, HomeState>(
+                listener: (context, state) {
+                  if (state is HomeCreateGroupSuccess) {
+                    Navigator.pop(context); // Tutup BottomSheet
+                    
+                    // Tambahkan ke UI
                     setState(() {
-                      groups.add(ChatGroup(
-                        name: nameController.text,
-                        description: descController.text,
-                        pin: int.tryParse(pinController.text) ?? 0,
-                      ));
+                      groups.add(state.newGroup);
                     });
-                    Navigator.pop(context);
+                    
+                    // Tampilkan Snackbar Hijau
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(state.message), backgroundColor: AppColors.success),
+                    );
+                  } else if (state is HomeError) {
+                    // Tampilkan Snackbar Merah
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(state.errorMessage), backgroundColor: AppColors.error),
+                    );
                   }
                 },
-                child: Text("Ciptakan Ruang", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1)),
+                builder: (context, state) {
+                  final isLoading = state is HomeLoading;
+
+                  return Container(
+                    width: double.infinity,
+                    height: 55,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(colors: [AppColors.secondaryDark, AppColors.secondary]),
+                      boxShadow: [BoxShadow(color: AppColors.secondary.withOpacity(0.4), blurRadius: 8, offset: Offset(0, 4))],
+                    ),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      onPressed: isLoading ? null : () {
+                        // Validasi simpel
+                        if (nameController.text.isNotEmpty && pinController.text.length == 6) {
+                          context.read<HomeBloc>().add(
+                            CreateGroupEvent(
+                              name: nameController.text,
+                              description: descController.text,
+                              pin: int.parse(pinController.text),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Isi data dengan benar dan pastikan PIN 6 digit!"), backgroundColor: AppColors.warning)
+                          );
+                        }
+                      },
+                      child: isLoading 
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text("Ciptakan Ruang", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1)),
+                    ),
+                  );
+                },
               ),
             ),
             SizedBox(height: 32),
@@ -98,6 +132,9 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+
+  // ... Sisa kode AppBar, ListView dan _buildGroupCard sama dengan sebelumnya ...
+  // PASTIKAN parameter _buildGroupCard menggunakan `GroupModel` bukan `ChatGroup`
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +214,7 @@ class _HomePageState extends State<HomePage> {
 
   // --- WIDGET BANTUAN ---
 
-  Widget _buildGroupCard(ChatGroup group, int index) {
+  Widget _buildGroupCard(GroupModel group, int index) {
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
