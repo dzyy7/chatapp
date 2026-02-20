@@ -5,6 +5,8 @@ import 'package:chatapp/injection.dart';
 import 'package:chatapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:chatapp/presentation/auth/bloc/auth_event.dart';
 import 'package:chatapp/presentation/auth/bloc/auth_state.dart';
+import 'package:go_router/go_router.dart';
+
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
   @override
@@ -15,11 +17,13 @@ class LoginPage extends StatelessWidget {
     );
   }
 }
+
 class _LoginForm extends StatefulWidget {
   const _LoginForm();
   @override
   State<_LoginForm> createState() => _LoginFormState();
 }
+
 class _LoginFormState extends State<_LoginForm> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -31,16 +35,18 @@ class _LoginFormState extends State<_LoginForm> {
     _passwordController.dispose();
     super.dispose();
   }
+
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
-            AuthLoginEvent(
-              username: _usernameController.text.trim(),
-              password: _passwordController.text,
-            ),
-          );
+        AuthLoginEvent(
+          username: _usernameController.text.trim(),
+          password: _passwordController.text,
+        ),
+      );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
@@ -52,6 +58,8 @@ class _LoginFormState extends State<_LoginForm> {
               backgroundColor: AppColors.success,
             ),
           );
+          // 2. Tambahkan navigasi ini untuk pindah ke HomePage
+          context.go('/home');
         } else if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -68,7 +76,10 @@ class _LoginFormState extends State<_LoginForm> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   child: Row(
                     children: [
                       GestureDetector(
@@ -171,7 +182,9 @@ class _LoginFormState extends State<_LoginForm> {
                               width: double.infinity,
                               height: 50,
                               child: ElevatedButton(
-                                onPressed: state is AuthLoading ? null : _handleLogin,
+                                onPressed: state is AuthLoading
+                                    ? null
+                                    : _handleLogin,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primary,
                                   shape: RoundedRectangleBorder(
@@ -216,7 +229,9 @@ class _LoginFormState extends State<_LoginForm> {
                                   child: Divider(color: AppColors.divider),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
                                   child: const Text(
                                     "Or sign in with",
                                     style: TextStyle(
@@ -263,6 +278,7 @@ class _LoginFormState extends State<_LoginForm> {
       },
     );
   }
+
   Widget _buildInputLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -279,6 +295,7 @@ class _LoginFormState extends State<_LoginForm> {
       ),
     );
   }
+
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
@@ -324,6 +341,7 @@ class _LoginFormState extends State<_LoginForm> {
       ),
     );
   }
+
   Widget _buildSocialButton({
     required IconData icon,
     required String label,
