@@ -148,9 +148,10 @@ class _HomePageState extends State<HomePage> {
                     curve: Curves.easeOutBack,
                     tween: Tween<double>(begin: 0, end: 1),
                     builder: (context, double value, child) {
+                      final clampedValue = value.clamp(0.0, 1.0);
                       return Transform.translate(
-                        offset: Offset(0, 50 * (1 - value)),
-                        child: Opacity(opacity: value, child: child),
+                        offset: Offset(0, 50 * (1 - clampedValue)),
+                        child: Opacity(opacity: clampedValue, child: child),
                       );
                     },
                     child: _buildGroupCard(groups[index], index),
