@@ -1,0 +1,45 @@
+import 'package:chatapp/data/models/chat_message.dart';
+import 'package:chatapp/data/models/chat_history_response.dart';
+import 'package:chatapp/data/services/api/chat_service.dart';
+import 'package:chatapp/data/services/websocket/chat_socket_service.dart';
+
+class ChatRoomRepository {
+  final ChatSocketService _socketService;
+  final ChatService _chatService;
+
+  ChatRoomRepository(this._socketService, this._chatService);
+
+  Stream<ChatMessage> get messageStream => _socketService.messageStream;
+
+  bool get isConnected => _socketService.isConnected;
+
+  Future<ChatHistoryData> getChatHistory(
+    String groupId, {
+    int page = 1,
+    int size = 10,
+  }) async {
+    final response = await _chatService.getChatHistory(
+      groupId,
+      page: page,
+      size: size,
+    );
+
+    if (response.isSuccess) {
+      return response.data;
+    } else {
+      throw Exception(response.message);
+    }
+  }
+
+  Future<void> connect(String groupId) async {
+    await _socketService.connect(groupId);
+  }
+
+  void sendMessage(String text) {
+    _socketService.sendMessage(text);
+  }
+
+  void disconnect() {
+    _socketService.disconnect();
+  }
+}

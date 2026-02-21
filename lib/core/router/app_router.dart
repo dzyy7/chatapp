@@ -1,35 +1,31 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-
-// Import UI Pages
+import 'package:chatapp/core/router/route_names.dart';
+import 'package:chatapp/data/models/chat_group.dart';
 import 'package:chatapp/presentation/auth/login_page.dart';
-import 'package:chatapp/presentation/home/home_page.dart'; 
-
-// Import Bloc, Repository, dan Service yang baru kita buat
-import 'package:chatapp/presentation/home/bloc/home_bloc.dart';
-import 'package:chatapp/data/repositories/chat_repository.dart';
-import 'package:chatapp/data/services/api/chat_service.dart';
+import 'package:chatapp/presentation/home/home_page.dart';
+import 'package:chatapp/presentation/chat/chat_page.dart';
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/login',
+  initialLocation: RouteNames.login,
   routes: [
     GoRoute(
-      path: '/login',
+      path: RouteNames.login,
+      name: 'login',
       builder: (context, state) => const LoginPage(),
     ),
     GoRoute(
-      path: '/home',
+      path: RouteNames.home,
+      name: 'home',
+      builder: (context, state) => const HomePage(),
+    ),
+    GoRoute(
+      path: '${RouteNames.chat}/:groupId',
+      name: 'chat',
       builder: (context, state) {
-        // Bungkus HomePage dengan BlocProvider
-        return BlocProvider(
-          create: (context) => HomeBloc(
-            // Inisialisasi Repository dan Service secara berurutan
-            chatRepository: ChatRepository(
-              apiService: ChatService(),
-            ),
-          ),
-          child: HomePage(),
-        );
+        final groupId = state.pathParameters['groupId'] ?? '';
+        final group = state.extra as ChatGroup? ?? 
+            ChatGroup(id: groupId, name: 'Group', description: '', pin: 0);
+        return ChatPage(groupId: groupId, group: group);
       },
     ),
   ],
