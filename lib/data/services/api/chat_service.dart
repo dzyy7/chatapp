@@ -8,6 +8,8 @@ import 'package:chatapp/data/models/chat_group_request.dart';
 import 'package:chatapp/data/models/chat_group_response.dart';
 import 'package:chatapp/data/models/chat_groups_response.dart';
 import 'package:chatapp/data/models/chat_history_response.dart';
+import 'package:chatapp/data/models/verify_pin_request.dart';
+import 'package:chatapp/data/models/verify_pin_response.dart';
 
 class ChatService {
   final UserStorage _userStorage;
@@ -118,6 +120,40 @@ class ChatService {
 
       final json = jsonDecode(response.body);
       return ChatHistoryResponse.fromJson(json);
+    } catch (e) {
+      debugPrint('❌ ChatService Error: $e');
+      debugPrint('════════════════════════════════════════');
+      rethrow;
+    }
+  }
+
+  Future<VerifyPinResponse> verifyPin(VerifyPinRequest request) async {
+    final url = Uri.parse('$_baseUrl/group/verify_pin');
+    final authHeader = await _userStorage.getAuthorizationHeader();
+
+    debugPrint('════════════════════════════════════════');
+    debugPrint('🔐 ChatService - Verify PIN');
+    debugPrint('📍 URL: $url');
+    debugPrint('📦 Body: ${jsonEncode(request.toJson())}');
+    debugPrint('🔑 Auth: $authHeader');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          if (authHeader != null) 'Authorization': authHeader,
+        },
+        body: jsonEncode(request.toJson()),
+      );
+
+      debugPrint('📡 Response Status: ${response.statusCode}');
+      debugPrint('📄 Response Body: ${response.body}');
+      debugPrint('════════════════════════════════════════');
+
+      final json = jsonDecode(response.body);
+      return VerifyPinResponse.fromJson(json);
     } catch (e) {
       debugPrint('❌ ChatService Error: $e');
       debugPrint('════════════════════════════════════════');

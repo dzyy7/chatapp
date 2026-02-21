@@ -7,6 +7,7 @@ import 'package:chatapp/data/models/chat_group.dart';
 import 'package:chatapp/presentation/home/bloc/home_bloc.dart';
 import 'package:chatapp/presentation/home/bloc/home_event.dart';
 import 'package:chatapp/presentation/home/bloc/home_state.dart';
+import 'package:chatapp/presentation/verify_pin/widgets/verify_pin_dialog.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -346,9 +347,15 @@ class _HomeContentState extends State<_HomeContent> {
           borderRadius: BorderRadius.circular(20),
           highlightColor: AppColors.primaryLight.withOpacity(0.3),
           splashColor: AppColors.primaryLight.withOpacity(0.5),
-          onTap: () {
+          onTap: () async {
             if (group.id != null) {
-              context.push('/chat/${group.id}', extra: group);
+              final verified = await VerifyPinDialog.show(
+                context,
+                group: group,
+              );
+              if (verified == true && mounted) {
+                context.push('/chat/${group.id}', extra: group);
+              }
             }
           },
           child: Padding(

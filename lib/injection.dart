@@ -9,6 +9,7 @@ import 'package:chatapp/data/repositories/chat_room_repository.dart';
 import 'package:chatapp/presentation/auth/bloc/auth_bloc.dart';
 import 'package:chatapp/presentation/home/bloc/home_bloc.dart';
 import 'package:chatapp/presentation/chat/bloc/chat_bloc.dart';
+import 'package:chatapp/presentation/verify_pin/bloc/verify_pin_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -30,4 +31,5 @@ Future<void> init() async {
   sl.registerFactory(() => AuthBloc(sl()));
   sl.registerFactory(() => HomeBloc(sl()));
   sl.registerFactory(() => ChatBloc(sl()));
+  sl.registerFactory(() => VerifyPinBloc(sl()));
 }

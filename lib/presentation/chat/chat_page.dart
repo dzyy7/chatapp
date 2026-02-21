@@ -60,12 +60,16 @@ class _ChatContentState extends State<_ChatContent> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels <= 50 && !_isLoadingMore) {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 50 &&
+        !_isLoadingMore) {
       final state = context.read<ChatBloc>().state;
-      if (state is ChatConnected && state.hasMoreHistory && !state.isLoadingHistory) {
+      if (state is ChatConnected &&
+          state.hasMoreHistory &&
+          !state.isLoadingHistory) {
         setState(() => _isLoadingMore = true);
         context.read<ChatBloc>().add(ChatLoadHistoryEvent());
-        
+
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) {
             setState(() => _isLoadingMore = false);
@@ -236,10 +240,11 @@ class _ChatContentState extends State<_ChatContent> {
                 )
               : ListView.builder(
                   controller: _scrollController,
+                  reverse: true,
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: messages.length + (isLoadingHistory ? 1 : 0),
                   itemBuilder: (context, index) {
-                    if (index == 0 && isLoadingHistory) {
+                    if (index == messages.length && isLoadingHistory) {
                       return const Center(
                         child: Padding(
                           padding: EdgeInsets.all(16),
@@ -255,12 +260,7 @@ class _ChatContentState extends State<_ChatContent> {
                       );
                     }
                     
-                    final messageIndex = isLoadingHistory ? index - 1 : index;
-                    if (messageIndex < 0 || messageIndex >= messages.length) {
-                      return const SizedBox.shrink();
-                    }
-                    
-                    return MessageBubble(message: messages[messageIndex]);
+                    return MessageBubble(message: messages[index]);
                   },
                 ),
         ),

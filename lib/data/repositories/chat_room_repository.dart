@@ -1,5 +1,7 @@
 import 'package:chatapp/data/models/chat_message.dart';
 import 'package:chatapp/data/models/chat_history_response.dart';
+import 'package:chatapp/data/models/verify_pin_request.dart';
+import 'package:chatapp/data/models/verify_pin_response.dart';
 import 'package:chatapp/data/services/api/chat_service.dart';
 import 'package:chatapp/data/services/websocket/chat_socket_service.dart';
 
@@ -41,5 +43,13 @@ class ChatRoomRepository {
 
   void disconnect() {
     _socketService.disconnect();
+  }
+
+  Future<VerifyPinResponse> verifyPin({
+    required String groupId,
+    required int pin,
+  }) async {
+    final request = VerifyPinRequest(groupId: groupId, pin: pin);
+    return await _chatService.verifyPin(request);
   }
 }

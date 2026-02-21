@@ -93,7 +93,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       );
 
       final olderMessages = historyData.items.reversed.toList();
-      _messages = [...olderMessages, ..._messages];
+      _messages = [..._messages, ...olderMessages];
       _hasMoreHistory = historyData.hasMore;
 
       debugPrint('📚 ChatBloc - Loaded ${olderMessages.length} older messages');
