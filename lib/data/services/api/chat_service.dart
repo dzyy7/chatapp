@@ -96,7 +96,10 @@ class ChatService {
     int page = 1,
     int size = 10,
   }) async {
-    final url = Uri.parse('$_baseUrl/group/chat_history/$groupId?page=$page&size=$size');
+    // Tambahkan &order=desc di akhir URL
+    final url = Uri.parse(
+      '$_baseUrl/group/chat_history/$groupId?page=$page&size=$size&order=desc',
+    );
     final authHeader = await _userStorage.getAuthorizationHeader();
 
     debugPrint('════════════════════════════════════════');

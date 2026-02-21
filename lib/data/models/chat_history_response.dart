@@ -44,7 +44,7 @@ class ChatHistoryData {
 
   factory ChatHistoryData.fromJson(Map<String, dynamic> json) {
     final itemsList = json['items'] as List<dynamic>? ?? [];
-    
+
     return ChatHistoryData(
       size: json['size'] ?? 10,
       page: json['page'] ?? 1,
@@ -57,5 +57,5 @@ class ChatHistoryData {
     );
   }
 
-  bool get hasMore => items.length < total;
+  bool get hasMore => (page * size) < total;
 }

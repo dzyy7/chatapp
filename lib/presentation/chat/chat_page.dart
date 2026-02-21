@@ -13,17 +13,13 @@ class ChatPage extends StatelessWidget {
   final String groupId;
   final ChatGroup group;
 
-  const ChatPage({
-    super.key,
-    required this.groupId,
-    required this.group,
-  });
+  const ChatPage({super.key, required this.groupId, required this.group});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => sl<ChatBloc>()
-        ..add(ChatConnectEvent(groupId: groupId, group: group)),
+      create: (context) =>
+          sl<ChatBloc>()..add(ChatConnectEvent(groupId: groupId, group: group)),
       child: _ChatContent(groupId: groupId, group: group),
     );
   }
@@ -33,10 +29,7 @@ class _ChatContent extends StatefulWidget {
   final String groupId;
   final ChatGroup group;
 
-  const _ChatContent({
-    required this.groupId,
-    required this.group,
-  });
+  const _ChatContent({required this.groupId, required this.group});
 
   @override
   State<_ChatContent> createState() => _ChatContentState();
@@ -44,7 +37,6 @@ class _ChatContent extends StatefulWidget {
 
 class _ChatContentState extends State<_ChatContent> {
   final ScrollController _scrollController = ScrollController();
-  bool _isLoadingMore = false;
 
   @override
   void initState() {
@@ -61,20 +53,12 @@ class _ChatContentState extends State<_ChatContent> {
 
   void _onScroll() {
     if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 50 &&
-        !_isLoadingMore) {
+        _scrollController.position.maxScrollExtent - 50) {
       final state = context.read<ChatBloc>().state;
       if (state is ChatConnected &&
           state.hasMoreHistory &&
           !state.isLoadingHistory) {
-        setState(() => _isLoadingMore = true);
         context.read<ChatBloc>().add(ChatLoadHistoryEvent());
-
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            setState(() => _isLoadingMore = false);
-          }
-        });
       }
     }
   }
@@ -135,10 +119,7 @@ class _ChatContentState extends State<_ChatContent> {
           ),
           Text(
             subtitle,
-            style: const TextStyle(
-              color: AppColors.surface,
-              fontSize: 12,
-            ),
+            style: const TextStyle(color: AppColors.surface, fontSize: 12),
           ),
         ],
       ),
@@ -193,13 +174,19 @@ class _ChatContentState extends State<_ChatContent> {
             ElevatedButton(
               onPressed: () {
                 context.read<ChatBloc>().add(
-                      ChatConnectEvent(groupId: widget.groupId, group: widget.group),
-                    );
+                  ChatConnectEvent(
+                    groupId: widget.groupId,
+                    group: widget.group,
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
               ),
-              child: const Text('Retry', style: TextStyle(color: AppColors.surface)),
+              child: const Text(
+                'Retry',
+                style: TextStyle(color: AppColors.surface),
+              ),
             ),
           ],
         ),
@@ -207,7 +194,9 @@ class _ChatContentState extends State<_ChatContent> {
     }
 
     final messages = state is ChatConnected ? state.messages : <dynamic>[];
-    final isLoadingHistory = state is ChatConnected ? state.isLoadingHistory : false;
+    final isLoadingHistory = state is ChatConnected
+        ? state.isLoadingHistory
+        : false;
 
     return Column(
       children: [
@@ -239,6 +228,7 @@ class _ChatContentState extends State<_ChatContent> {
                   ),
                 )
               : ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   controller: _scrollController,
                   reverse: true,
                   padding: const EdgeInsets.symmetric(vertical: 8),
@@ -259,7 +249,7 @@ class _ChatContentState extends State<_ChatContent> {
                         ),
                       );
                     }
-                    
+
                     return MessageBubble(message: messages[index]);
                   },
                 ),

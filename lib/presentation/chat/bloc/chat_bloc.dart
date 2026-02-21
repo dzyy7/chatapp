@@ -26,10 +26,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     ChatConnectEvent event,
     Emitter<ChatState> emit,
   ) async {
-    debugPrint('════════════════════════════════════════');
     debugPrint('🎯 ChatBloc - Connect to group: ${event.groupId}');
-
     emit(ChatConnecting(group: event.group));
+
     _messages = [];
     _currentPage = 1;
     _hasMoreHistory = true;
@@ -39,34 +38,30 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       final historyData = await _chatRoomRepository.getChatHistory(
         event.groupId,
         page: _currentPage,
-        size: 10,
+        size: 20, 
       );
 
-      final historyMessages = historyData.items.reversed.toList();
-      _messages = historyMessages;
-      _hasMoreHistory = historyData.hasMore;
-
-      debugPrint('📚 ChatBloc - Loaded ${historyMessages.length} history messages');
+      _messages = historyData.items;
+      _hasMoreHistory = _messages.length < historyData.total;
 
       await _chatRoomRepository.connect(event.groupId);
 
-      _messageSubscription = _chatRoomRepository.messageStream.listen(
-        (message) {
-          add(ChatMessageReceivedEvent(message: message));
-        },
-      );
+      _messageSubscription = _chatRoomRepository.messageStream.listen((
+        message,
+      ) {
+        add(ChatMessageReceivedEvent(message: message));
+      });
 
-      debugPrint('✅ ChatBloc - Connected');
-      emit(ChatConnected(
-        group: event.group,
-        messages: _messages,
-        hasMoreHistory: _hasMoreHistory,
-      ));
+      emit(
+        ChatConnected(
+          group: event.group,
+          messages: _messages,
+          hasMoreHistory: _hasMoreHistory,
+        ),
+      );
     } catch (e) {
-      debugPrint('💥 ChatBloc - Connection error: $e');
       emit(ChatError(message: e.toString()));
     }
-    debugPrint('════════════════════════════════════════');
   }
 
   Future<void> _onLoadHistory(
@@ -74,38 +69,34 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     Emitter<ChatState> emit,
   ) async {
     if (state is! ChatConnected) return;
-    
     final currentState = state as ChatConnected;
-    
     if (currentState.isLoadingHistory || !_hasMoreHistory) return;
-
-    debugPrint('📚 ChatBloc - Loading more history, page: ${_currentPage + 1}');
 
     emit(currentState.copyWith(isLoadingHistory: true));
 
     try {
       _currentPage++;
-      
+
       final historyData = await _chatRoomRepository.getChatHistory(
         _groupId!,
         page: _currentPage,
-        size: 10,
+        size: 20,
       );
 
-      final olderMessages = historyData.items.reversed.toList();
+      final olderMessages = historyData.items;
+
       _messages = [..._messages, ...olderMessages];
       _hasMoreHistory = historyData.hasMore;
 
-      debugPrint('📚 ChatBloc - Loaded ${olderMessages.length} older messages');
-      
-      emit(ChatConnected(
-        group: currentState.group,
-        messages: _messages,
-        hasMoreHistory: _hasMoreHistory,
-        isLoadingHistory: false,
-      ));
+      emit(
+        ChatConnected(
+          group: currentState.group,
+          messages: _messages,
+          hasMoreHistory: _hasMoreHistory,
+          isLoadingHistory: false,
+        ),
+      );
     } catch (e) {
-      debugPrint('💥 ChatBloc - Load history error: $e');
       _currentPage--;
       emit(currentState.copyWith(isLoadingHistory: false));
     }
@@ -126,7 +117,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       final currentState = state as ChatConnected;
       debugPrint('📥 ChatBloc - Message received: ${event.message.text}');
 
-      _messages = [..._messages, event.message];
+      _messages = [event.message, ..._messages];
 
       emit(currentState.copyWith(messages: _messages));
     }
