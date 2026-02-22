@@ -349,11 +349,18 @@ class _HomeContentState extends State<_HomeContent> {
           splashColor: AppColors.primaryLight.withOpacity(0.5),
           onTap: () async {
             if (group.id != null) {
-              final verified = await VerifyPinDialog.show(
-                context,
-                group: group,
-              );
-              if (verified == true && mounted) {
+              if (group.pin > 0) {
+                final verifiedPin = await VerifyPinDialog.show(
+                  context,
+                  group: group,
+                );
+                if (verifiedPin != null && mounted) {
+                  context.push('/chat/${group.id}', extra: {
+                    'group': group,
+                    'pin': verifiedPin,
+                  });
+                }
+              } else {
                 context.push('/chat/${group.id}', extra: group);
               }
             }

@@ -13,11 +13,12 @@ class VerifyPinLoading extends VerifyPinState {}
 
 class VerifyPinSuccess extends VerifyPinState {
   final String groupId;
+  final int pin;
 
-  const VerifyPinSuccess({required this.groupId});
+  const VerifyPinSuccess({required this.groupId, required this.pin});
 
   @override
-  List<Object?> get props => [groupId];
+  List<Object?> get props => [groupId, pin];
 }
 
 class VerifyPinError extends VerifyPinState {

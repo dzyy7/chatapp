@@ -31,7 +31,7 @@ class VerifyPinBloc extends Bloc<VerifyPinEvent, VerifyPinState> {
 
       if (response.isSuccess) {
         debugPrint('✅ VerifyPinBloc - PIN Verified');
-        emit(VerifyPinSuccess(groupId: event.groupId));
+        emit(VerifyPinSuccess(groupId: event.groupId, pin: event.pin));
       } else {
         debugPrint('❌ VerifyPinBloc - PIN Invalid: ${response.message}');
         emit(VerifyPinError(message: response.message));

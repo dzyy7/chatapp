@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/io.dart';
 import 'package:chatapp/core/utils/user_storage.dart';
 import 'package:chatapp/data/models/chat_message.dart';
 
 class ChatSocketService {
   final UserStorage _userStorage;
-  WebSocketChannel? _channel;
+  IOWebSocketChannel? _channel;
   StreamController<ChatMessage>? _messageController;
   String? _currentUserId;
   bool _isConnected = false;
@@ -17,7 +17,9 @@ class ChatSocketService {
 
   String get _baseUrl {
     final httpUrl = dotenv.env['BASE_URL'] ?? '';
-    return httpUrl.replaceFirst('https://', 'wss://').replaceFirst('http://', 'ws://');
+    return httpUrl
+        .replaceFirst('https://', 'wss://')
+        .replaceFirst('http://', 'ws://');
   }
 
   Stream<ChatMessage> get messageStream {
@@ -27,22 +29,28 @@ class ChatSocketService {
 
   bool get isConnected => _isConnected;
 
-  Future<void> connect(String groupId) async {
+  Future<void> connect(String groupId, {String? pin}) async {
     final token = await _userStorage.getToken();
 
     if (token != null) {
       _currentUserId = _extractUserIdFromToken(token);
     }
 
-    final url = Uri.parse('$_baseUrl/ws/group_chat/$groupId?token=$token');
+    String urlStr = '$_baseUrl/chat /ws/group_chat/$groupId?token=$token';
+    if (pin != null && pin.isNotEmpty) {
+      urlStr += '&pin=$pin';
+    }
+
+    final url = Uri.parse(urlStr);
 
     debugPrint('════════════════════════════════════════');
     debugPrint('🔌 ChatSocketService - Connecting');
     debugPrint('📍 URL: $url');
     debugPrint('🔑 Token: ${token?.substring(0, 20)}...');
+    if (pin != null) debugPrint('🔐 PIN: $pin');
 
     try {
-      _channel = WebSocketChannel.connect(url);
+      _channel = IOWebSocketChannel.connect(url);
 
       await _channel!.ready;
       _isConnected = true;

@@ -9,7 +9,7 @@ import 'package:chatapp/presentation/verify_pin/bloc/verify_pin_state.dart';
 
 class VerifyPinDialog extends StatelessWidget {
   final ChatGroup group;
-  final VoidCallback onVerified;
+  final void Function(int pin) onVerified;
 
   const VerifyPinDialog({
     super.key,
@@ -17,19 +17,19 @@ class VerifyPinDialog extends StatelessWidget {
     required this.onVerified,
   });
 
-  static Future<bool?> show(
+  static Future<int?> show(
     BuildContext context, {
     required ChatGroup group,
   }) {
-    return showDialog<bool>(
+    return showDialog<int>(
       context: context,
       barrierDismissible: false,
       builder: (context) => BlocProvider(
         create: (context) => sl<VerifyPinBloc>(),
         child: VerifyPinDialog(
           group: group,
-          onVerified: () {
-            Navigator.of(context).pop(true);
+          onVerified: (pin) {
+            Navigator.of(context).pop(pin);
           },
         ),
       ),
@@ -41,7 +41,7 @@ class VerifyPinDialog extends StatelessWidget {
     return BlocConsumer<VerifyPinBloc, VerifyPinState>(
       listener: (context, state) {
         if (state is VerifyPinSuccess) {
-          onVerified();
+          onVerified(state.pin);
         }
       },
       builder: (context, state) {

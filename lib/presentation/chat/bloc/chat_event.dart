@@ -12,14 +12,16 @@ abstract class ChatEvent extends Equatable {
 class ChatConnectEvent extends ChatEvent {
   final String groupId;
   final ChatGroup group;
+  final String? pin;
 
   const ChatConnectEvent({
     required this.groupId,
     required this.group,
+    this.pin,
   });
 
   @override
-  List<Object?> get props => [groupId, group];
+  List<Object?> get props => [groupId, group, pin];
 }
 
 class ChatLoadHistoryEvent extends ChatEvent {

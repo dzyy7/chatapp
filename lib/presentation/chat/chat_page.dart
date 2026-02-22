@@ -12,15 +12,21 @@ import 'package:chatapp/presentation/chat/widgets/chat_input.dart';
 class ChatPage extends StatelessWidget {
   final String groupId;
   final ChatGroup group;
+  final String? pin;
 
-  const ChatPage({super.key, required this.groupId, required this.group});
+  const ChatPage({
+    super.key,
+    required this.groupId,
+    required this.group,
+    this.pin,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          sl<ChatBloc>()..add(ChatConnectEvent(groupId: groupId, group: group)),
-      child: _ChatContent(groupId: groupId, group: group),
+          sl<ChatBloc>()..add(ChatConnectEvent(groupId: groupId, group: group, pin: pin)),
+      child: _ChatContent(groupId: groupId, group: group, pin: pin),
     );
   }
 }
@@ -28,8 +34,13 @@ class ChatPage extends StatelessWidget {
 class _ChatContent extends StatefulWidget {
   final String groupId;
   final ChatGroup group;
+  final String? pin;
 
-  const _ChatContent({required this.groupId, required this.group});
+  const _ChatContent({
+    required this.groupId,
+    required this.group,
+    this.pin,
+  });
 
   @override
   State<_ChatContent> createState() => _ChatContentState();
@@ -177,6 +188,7 @@ class _ChatContentState extends State<_ChatContent> {
                   ChatConnectEvent(
                     groupId: widget.groupId,
                     group: widget.group,
+                    pin: widget.pin,
                   ),
                 );
               },

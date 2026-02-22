@@ -44,7 +44,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       _messages = historyData.items;
       _hasMoreHistory = _messages.length < historyData.total;
 
-      await _chatRoomRepository.connect(event.groupId);
+      await _chatRoomRepository.connect(event.groupId, pin: event.pin);
 
       _messageSubscription = _chatRoomRepository.messageStream.listen((
         message,

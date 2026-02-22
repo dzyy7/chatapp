@@ -23,9 +23,22 @@ final GoRouter appRouter = GoRouter(
       name: 'chat',
       builder: (context, state) {
         final groupId = state.pathParameters['groupId'] ?? '';
-        final group = state.extra as ChatGroup? ?? 
-            ChatGroup(id: groupId, name: 'Group', description: '', pin: 0);
-        return ChatPage(groupId: groupId, group: group);
+        
+        ChatGroup group;
+        String? pin;
+        
+        if (state.extra is Map<String, dynamic>) {
+          final extra = state.extra as Map<String, dynamic>;
+          group = extra['group'] as ChatGroup? ??
+              ChatGroup(id: groupId, name: 'Group', description: '', pin: 0);
+          pin = extra['pin']?.toString();
+        } else if (state.extra is ChatGroup) {
+          group = state.extra as ChatGroup;
+        } else {
+          group = ChatGroup(id: groupId, name: 'Group', description: '', pin: 0);
+        }
+        
+        return ChatPage(groupId: groupId, group: group, pin: pin);
       },
     ),
   ],

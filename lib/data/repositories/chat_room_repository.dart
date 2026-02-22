@@ -33,8 +33,8 @@ class ChatRoomRepository {
     }
   }
 
-  Future<void> connect(String groupId) async {
-    await _socketService.connect(groupId);
+  Future<void> connect(String groupId, {String? pin}) async {
+    await _socketService.connect(groupId, pin: pin);
   }
 
   void sendMessage(String text) {
