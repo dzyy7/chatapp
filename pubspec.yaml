@@ -45,6 +45,7 @@ dependencies:
   intl: ^0.19.0
   timezone: ^0.9.4
   flutter_launcher_icons: ^0.14.4
+  emoji_picker_flutter: ^4.4.0
 
 dev_dependencies:
   flutter_test:

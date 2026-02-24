@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:chatapp/data/models/chat_message.dart';
 import 'package:chatapp/data/models/chat_group.dart';
+import 'package:chatapp/data/services/websocket/chat_socket_service.dart';
 
 abstract class ChatEvent extends Equatable {
   const ChatEvent();
@@ -49,6 +50,35 @@ class ChatMessageReceivedEvent extends ChatEvent {
 
   @override
   List<Object?> get props => [message];
+}
+
+class ChatReactMessageEvent extends ChatEvent {
+  final String messageId;
+  final String emoji;
+
+  const ChatReactMessageEvent({required this.messageId, required this.emoji});
+
+  @override
+  List<Object?> get props => [messageId, emoji];
+}
+
+class ChatUnreactMessageEvent extends ChatEvent {
+  final String messageId;
+  final String emoji;
+
+  const ChatUnreactMessageEvent({required this.messageId, required this.emoji});
+
+  @override
+  List<Object?> get props => [messageId, emoji];
+}
+
+class ChatReactionReceivedEvent extends ChatEvent {
+  final ReactionEvent reactionEvent;
+
+  const ChatReactionReceivedEvent({required this.reactionEvent});
+
+  @override
+  List<Object?> get props => [reactionEvent];
 }
 
 class ChatDisconnectEvent extends ChatEvent {}

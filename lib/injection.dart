@@ -20,14 +20,19 @@ Future<void> init() async {
   // Services
   sl.registerLazySingleton(() => AuthService());
   sl.registerLazySingleton(() => ChatService(sl()));
+
+  // WebSocket service — singleton so stream controllers are never destroyed
   sl.registerLazySingleton(() => ChatSocketService(sl()));
 
   // Repositories
   sl.registerLazySingleton(() => AuthRepository(sl(), sl()));
   sl.registerLazySingleton(() => ChatRepository(sl()));
-  sl.registerFactory(() => ChatRoomRepository(sl(), sl()));
 
-  // Blocs
+  // ChatRoomRepository MUST be lazySingleton (not factory) so it shares
+  // the same ChatSocketService instance and its stable stream controllers.
+  sl.registerLazySingleton(() => ChatRoomRepository(sl(), sl()));
+
+  // Blocs — factory is correct here (new instance per page)
   sl.registerFactory(() => AuthBloc(sl()));
   sl.registerFactory(() => HomeBloc(sl()));
   sl.registerFactory(() => ChatBloc(sl()));

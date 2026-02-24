@@ -25,7 +25,8 @@ class ChatPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          sl<ChatBloc>()..add(ChatConnectEvent(groupId: groupId, group: group, pin: pin)),
+          sl<ChatBloc>()
+            ..add(ChatConnectEvent(groupId: groupId, group: group, pin: pin)),
       child: _ChatContent(groupId: groupId, group: group, pin: pin),
     );
   }
@@ -36,11 +37,7 @@ class _ChatContent extends StatefulWidget {
   final ChatGroup group;
   final String? pin;
 
-  const _ChatContent({
-    required this.groupId,
-    required this.group,
-    this.pin,
-  });
+  const _ChatContent({required this.groupId, required this.group, this.pin});
 
   @override
   State<_ChatContent> createState() => _ChatContentState();
@@ -205,10 +202,11 @@ class _ChatContentState extends State<_ChatContent> {
       );
     }
 
-    final messages = state is ChatConnected ? state.messages : <dynamic>[];
+    final messages = state is ChatConnected ? state.messages : [];
     final isLoadingHistory = state is ChatConnected
         ? state.isLoadingHistory
         : false;
+    final currentUserId = state is ChatConnected ? state.currentUserId : null;
 
     return Column(
       children: [
@@ -262,7 +260,10 @@ class _ChatContentState extends State<_ChatContent> {
                       );
                     }
 
-                    return MessageBubble(message: messages[index]);
+                    return MessageBubble(
+                      message: messages[index],
+                      currentUserId: currentUserId,
+                    );
                   },
                 ),
         ),

@@ -12,8 +12,10 @@ class ChatRoomRepository {
   ChatRoomRepository(this._socketService, this._chatService);
 
   Stream<ChatMessage> get messageStream => _socketService.messageStream;
+  Stream<ReactionEvent> get reactionStream => _socketService.reactionStream;
 
   bool get isConnected => _socketService.isConnected;
+  String? get currentUserId => _socketService.currentUserId;
 
   Future<ChatHistoryData> getChatHistory(
     String groupId, {
@@ -39,6 +41,18 @@ class ChatRoomRepository {
 
   void sendMessage(String text) {
     _socketService.sendMessage(text);
+  }
+
+  void sendReply(String replyToId, String text) {
+    _socketService.sendReply(replyToId, text);
+  }
+
+  void reactMessage(String messageId, String emoji) {
+    _socketService.sendReact(messageId, emoji);
+  }
+
+  void unreactMessage(String messageId, String emoji) {
+    _socketService.sendUnreact(messageId, emoji);
   }
 
   void disconnect() {
